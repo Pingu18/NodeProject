@@ -8,6 +8,10 @@ var app = express();
 app.set('view engine', 'hbs');
 app.use(express.static(__dirname + '/public'));
 
+app.get('/', (request, response) => {
+
+});
+
 app.listen(port, () => {
     console.log(`Server is up on port ${port}`);
 });

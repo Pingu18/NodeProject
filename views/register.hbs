@@ -11,11 +11,16 @@
     <h1>Register</h1>
 
     <div class="form">
-        <input type="text" name="username" placeholder="Username" required> <br>
-        <input type="password" name="password" placeholder="Password" required> <br>
-        <input type="email" name="email" placeholder="Email" required> <br>
-        <button type="button" onclick="">Register</button>
+
+        <form action="/create-user" method="POST">
+            Username: <input name="username" type="text"> <br>
+            Password: <input name="password" type="password"> <br>
+            Email: <input name="email" type="email"> <br>
+            <input type="submit">
+        </form>
+
     </div>
+
 
     <p>Already have an account? <a href="/">Sign In</a></p>
 

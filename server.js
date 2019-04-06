@@ -2,6 +2,8 @@ const express = require('express');
 const hbs = require('hbs');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
+const secret = "abc123";
+const session = require('express-session');
 const saltrounds = 10;
 const port = process.env.PORT || 8080;
 
@@ -14,6 +16,13 @@ app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({
     extended: true
 }));
+app.use(
+    session({
+      secret: secret,
+      resave: true,
+      saveUninitialized: false
+    })
+  );
 
 app.get('/', function (request, response) {
     response.render('home.hbs', {
@@ -54,6 +63,34 @@ app.post('/create-user', function (request, response) {
             });
         } else {
             response.send('Username not available. Try again.');
+        }
+    });
+
+});
+
+app.post('/login-user', function (request, response) {
+    var db = utils.getDB();
+
+    var username = request.body.username;
+    var password = request.body.password;
+
+    db.collection('users').find({
+        username: username
+    }).toArray(function (err, result) {
+        if (err || result[0] != null) {
+            let verify = bcrypt.compareSync(password, result[0].password);
+            if (verify) {
+                request.session.user = {
+                    username: result.username,
+                    email: result.email,
+                    id: result._id
+                };
+                response.send('You are now logged in');
+            } else {
+                response.send('Incorrect password');
+            }
+        } else {
+            response.send('Username not found');
         }
     });
 

@@ -11,9 +11,13 @@
     <h1>Login</h1>
 
     <div class="form">
-        <input type="text" name="username" placeholder="Username" required> <br>
-        <input type="password" name="password" placeholder="Password" required> <br>
-        <button type="button" onclick="">Sign In</button>
+
+        <form action="/login-user" method="POST">
+            Username: <input name="username" type="text"> <br>
+            Password: <input name="password" type="password"> <br>
+            <input type="submit">
+        </form>
+
     </div>
 
     <p>Don't have an account? <a href="/register">Register</a></p>

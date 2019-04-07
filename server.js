@@ -18,11 +18,23 @@ app.use(bodyParser.urlencoded({
 }));
 app.use(
     session({
-      secret: secret,
-      resave: true,
-      saveUninitialized: false
+        secret: secret,
+        resave: true,
+        saveUninitialized: false
     })
-  );
+);
+app.use('/profile', (request, response, next) => {
+    if (request.session.user) {
+        next();
+    } else {
+        response.status(401).send('User not authorized. Please log in.');
+    }
+});
+
+app.all('/logout', (request, response) => {
+    request.session.destroy();
+    response.redirect('/');
+});
 
 app.get('/', function (request, response) {
     response.render('home.hbs', {
@@ -33,6 +45,13 @@ app.get('/', function (request, response) {
 app.get('/register', function (request, response) {
     response.render('register.hbs', {
         title: 'Register'
+    });
+});
+
+app.get('/profile', function (request, response) {
+    response.render('profile.hbs', {
+        title: 'Account',
+        user: request.session.user.username 
     });
 });
 
@@ -81,11 +100,11 @@ app.post('/login-user', function (request, response) {
             let verify = bcrypt.compareSync(password, result[0].password);
             if (verify) {
                 request.session.user = {
-                    username: result.username,
-                    email: result.email,
-                    id: result._id
+                    username: result[0].username,
+                    email: result[0].email,
+                    id: result[0]._id
                 };
-                response.send('You are now logged in');
+                response.redirect('/profile');
             } else {
                 response.send('Incorrect password');
             }

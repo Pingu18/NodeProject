@@ -31,6 +31,14 @@ app.use('/profile', (request, response, next) => {
     }
 });
 
+app.use('/game', (request, response, next) => {
+    if (request.session.user) {
+        next();
+    } else {
+        response.status(401).send('User not authorized. Please log in.');
+    }
+});
+
 
 app.all('/logout', (request, response) => {
     request.session.destroy();
@@ -50,20 +58,25 @@ app.get('/register', function (request, response) {
 });
 
 app.get('/succeed/:username', function (request, response) {
-    if (request.params.username) {
-        console.log(request.params.username);
-        response.render('register_succeed.hbs', {
-            title: 'Succeed',
-            user: request.params.username
-        });
-    } else {
-        response.redirect('/404')
-    }
+    console.log(request.params.username);
+    response.render('register_succeed.hbs', {
+        title: 'Succeed',
+        user: request.params.username
+    });
 });
 
 app.get('/profile', function (request, response) {
+    console.log(request.session.user);
     response.render('profile.hbs', {
         title: 'Account',
+        user: request.session.user.username,
+        score: request.session.user.score
+    });
+});
+
+app.get('/game', function (request, response) {
+    response.render('game.hbs', {
+        title: 'Game',
         user: request.session.user.username 
     });
 });
@@ -83,14 +96,13 @@ app.post('/create-user', function (request, response) {
 
     db.collection('users').find({
         username: username
-    } || {
-        email: email
     }).toArray(function (err, result) {
-        if (err || result[0] == null) {
+        if (result[0] == null) {
             db.collection('users').insertOne({
                 username: username,
                 password: password,
-                email: email
+                email: email,
+                score: 0
             }, (err, result) => {
                 if (err) {
                     response.send('Unable to add user')
@@ -113,13 +125,14 @@ app.post('/login-user', function (request, response) {
     db.collection('users').find({
         username: username
     }).toArray(function (err, result) {
-        if (err || result[0] != null) {
+        if (result[0] != null) {
             let verify = bcrypt.compareSync(password, result[0].password);
             if (verify) {
                 request.session.user = {
                     username: result[0].username,
                     email: result[0].email,
-                    id: result[0]._id
+                    id: result[0]._id,
+                    score: result[0].score
                 };
                 response.redirect('/profile');
             } else {

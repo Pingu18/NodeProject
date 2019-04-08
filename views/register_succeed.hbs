@@ -69,7 +69,7 @@
 		<h1>Succeed!</h1>
 		<p id="notification">Congratulation <b>{{user}}</b>, you have been successfully registered</p>		
 		<a href="/"><button class="Btn">Login Now!</button></a>
-		<p id="second">wwwwwww</p>
+		<p id="second"></p>
 	</div>
 </body>
 <script type="text/javascript">
@@ -80,7 +80,7 @@
             window.location.href="/";
             countdown = 5;
         } else {
-        	document.getElementById("second").innerHTML = `Automatically back to login page in ${countdown} seconds	`;
+        	document.getElementById("second").innerHTML = `Automatically back to login page in ${countdown} seconds`;
             countdown --;
             var countdown_func = setTimeout('cd()', 1000)
         }

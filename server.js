@@ -31,6 +31,7 @@ app.use('/profile', (request, response, next) => {
     }
 });
 
+
 app.all('/logout', (request, response) => {
     request.session.destroy();
     response.redirect('/');
@@ -48,12 +49,28 @@ app.get('/register', function (request, response) {
     });
 });
 
+app.get('/succeed/:username', function (request, response) {
+    if (request.params.username) {
+        console.log(request.params.username);
+        response.render('register_succeed.hbs', {
+            title: 'Succeed',
+            user: request.params.username
+        });
+    } else {
+        response.redirect('/404')
+    }
+});
+
 app.get('/profile', function (request, response) {
     response.render('profile.hbs', {
         title: 'Account',
         user: request.session.user.username 
     });
 });
+
+app.get('/404', function (request, response) {
+    response.send('Page Not Fount')
+})
 
 app.post('/create-user', function (request, response) {
     var db = utils.getDB();
@@ -78,7 +95,7 @@ app.post('/create-user', function (request, response) {
                 if (err) {
                     response.send('Unable to add user')
                 }
-                response.send(JSON.stringify(result.ops, undefined, 2));
+                response.redirect(`/succeed/${username}`);
             });
         } else {
             response.send('Username not available. Try again.');

@@ -77,7 +77,8 @@ app.get('/profile', function (request, response) {
 app.get('/game', function (request, response) {
     response.render('game.hbs', {
         title: 'Game',
-        user: request.session.user.username 
+        user: request.session.user.username, 
+        score: request.session.user.score
     });
 });
 

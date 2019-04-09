@@ -98,16 +98,36 @@ app.post('/create-user', function (request, response) {
 
     var username = request.body.username;
     var password = request.body.password;
+    var password_confirm = request.body.password_confirm;
     var email = request.body.email;
     var token = "";
     var tokenExpires = "";
+    var create = 1;
+
+    if (password != password_confirm) {
+        response.render('simple_response.hbs', {
+            h1: 'Passwords must match'
+        });
+        create = 0;
+    };
+
+    db.collection('users').find({
+        email: email
+    }).toArray(function (err, result) {
+        if (result[0] != null) {
+            response.render('simple_response.hbs', {
+                h1: 'Email already in use'
+            })
+            create = 0;
+        };
+    });
 
     password = bcrypt.hashSync(password, saltrounds);
 
     db.collection('users').find({
         username: username
     }).toArray(function (err, result) {
-        if (result[0] == null) {
+        if (result[0] == null && create == 1) {
             db.collection('users').insertOne({
                 username: username,
                 password: password,

@@ -9,7 +9,7 @@ const flash = require('express-flash');
 const nodemailer = require('nodemailer');
 const async = require('async');
 const { google } = require('googleapis');
-const atoken = "ya29.GlvmBgLSQDLyD8KaEYrakdfHjPA41CCR10qyx5h-hkZaBpo-zZSwIp3Jvy3k1S3XyIUQNPY8muZVuW8FNpwWGYbIdm52ShfFDOCNsZpGbrl_16_LD1DVQUImEySJ";
+const atoken = "ya29.GlvmBrkOyJpvGJMrHC3qHNRkWTniML2DgCTQ26yjbnrkQyCr2R6P5-l6XYPg9nkvkM3Kl4XXYd4iMEDCC-XoFEELZhyTTI83Bh9qyQv3uN0TIcf53jLddDqsmXsD";
 const saltrounds = 10;
 const port = process.env.PORT || 8080;
 
@@ -342,6 +342,5 @@ app.post('/reset/:token', function (request, response) {
 });
 app.listen(port, () => {
     console.log(`Server is up on port ${port}`);
-    console.log(atoken);
     utils.init();
 });

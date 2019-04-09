@@ -7,8 +7,8 @@
     <div id="top_bar">
         <h1> Welcome back, {{user}}</h1>
         <div id="menu">
-            <form align="right" name="setting" method="all" action="/setting-user">
-                <input name="setting" type="submit" value="Setting">
+            <form align="right" name="setting" method="all" action="/reset-password">
+                <input name="setting" type="submit" value="Rest Password">
             </form>
             <form align="right" name="logout" method="all" action="/logout">
                 <input name="logout" type="submit" value="Logout">
@@ -72,7 +72,6 @@ input {
     color: #e1e1e1;
     box-shadow: none;
     border: none;
-    font-size: 18px;
 }
 
 input:hover{
@@ -83,7 +82,6 @@ input:hover{
     color: #e15848;
     box-shadow: none;
     border: 2px solid #e15848;
-    font-size: 18px;
     transition: 0.3s;
 }
 

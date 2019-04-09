@@ -9,7 +9,7 @@ const flash = require('express-flash');
 const nodemailer = require('nodemailer');
 const async = require('async');
 const { google } = require('googleapis');
-const atoken = "ya29.GlvmBohndsUqu_1RGa4OrpDkMoSMboTLmfKnjqIpWPuygPYoFuux1liJCtcTWSzXkFiXPJ4636p-EnExQfUvUzemNUyzu3r9eOGwJFyTXzgx8LVz7xnhYk-25Pu6";
+const atoken = "ya29.GlvmBgLSQDLyD8KaEYrakdfHjPA41CCR10qyx5h-hkZaBpo-zZSwIp3Jvy3k1S3XyIUQNPY8muZVuW8FNpwWGYbIdm52ShfFDOCNsZpGbrl_16_LD1DVQUImEySJ";
 const saltrounds = 10;
 const port = process.env.PORT || 8080;
 
@@ -84,7 +84,7 @@ app.get('/profile', function (request, response) {
 app.get('/game', function (request, response) {
     response.render('game.hbs', {
         title: 'Game',
-        user: request.session.user.username, 
+        user: request.session.user.username,
         score: request.session.user.score
     });
 });
@@ -99,6 +99,8 @@ app.post('/create-user', function (request, response) {
     var username = request.body.username;
     var password = request.body.password;
     var email = request.body.email;
+    var token = "";
+    var tokenExpires = "";
 
     password = bcrypt.hashSync(password, saltrounds);
 
@@ -110,15 +112,21 @@ app.post('/create-user', function (request, response) {
                 username: username,
                 password: password,
                 email: email,
+                token: token,
+                tokenExpire: tokenExpires,
                 score: 0
             }, (err, result) => {
                 if (err) {
-                    response.send('Unable to add user');
+                    response.render('simple_response.hbs', {
+                        h1: 'Unable to add user'
+                    });
                 }
                 response.redirect(`/succeed/${username}`);
             });
         } else {
-            response.send('Username not available. Try again.');
+            response.render('simple_response.hbs', {
+                h1: 'Username not available'
+            });
         }
     });
 
@@ -140,14 +148,20 @@ app.post('/login-user', function (request, response) {
                     username: result[0].username,
                     email: result[0].email,
                     id: result[0]._id,
-                    score: result[0].score
+                    token: result[0].token,
+                    tokenExpire: result[0].tokenExpire,
+                    score: result[0].score,
                 };
                 response.redirect('/profile');
             } else {
-                response.send('Incorrect password');
+                response.render('simple_response.hbs', {
+                    h1: 'Incorrect Password'
+                });
             }
         } else {
-            response.send('Username not found');
+            response.render('simple_response.hbs', {
+                h1: 'Username not found'
+            });
         }
     });
 
@@ -167,56 +181,147 @@ app.post('/reset', function (request, response) {
     db.collection('users').find({
         email: email
     }).toArray(function (err, result) {
+
         if (!result[0]) {
-            request.flash('error', 'No registered account with that email.');
-            response.redirect('/reset-password');
+            response.render('simple_response.hbs', {
+                h1: 'No account with specified email'
+            });
         } else {
+
+            request.session.user = {
+                username: result[0].username,
+                email: result[0].email,
+                id: result[0]._id,
+                token: result[0].token,
+                tokenExpire: result[0].tokenExpire,
+                score: result[0].score,
+            };
+
             crypto.randomBytes(15, function (err, buf) {
                 token = buf.toString('hex');
-                result[0].token = token;
-                result[0].tokenExpire = Date.now() + 3600000;
+
+                db.collection('users').updateOne(
+                    { email: email },
+                    {
+                        $set: {
+                            token: token,
+                            tokenExpire: Date.now() + 3600
+                        }
+                    }
+                )
+
+                request.session.user.token = token
+                request.session.user.tokenExpire = Date.now() + 3600
+                request.session.save(function (err) {
+                    if (err) {
+                        console.log(err);
+                    }
+                })
             });
 
             var auth = {
                 type: 'oauth2',
                 user: 'roulettegame.node@gmail.com',
                 clientId: process.env.client_id,
-                clientSecret: process.env.clietn_secret,
+                clientSecret: process.env.client_secret,
                 refreshToken: process.env.refresh_token,
                 accessToken: atoken
             };
 
-            var mailOptions = {
-                to:result[0].email,
-                from: 'roulettegame.node@gmail.com',
-                subject: 'Password Reset',
-                text: 'The account linked to this email has requested a password reset. Click the following link and enter a new password. ' + 'localhost:8080' +
-                    '/reset-pw' + token
-            };
+            db.collection('users').find({
+                email: email
+            }).toArray(function (err, result) {
+                var mailOptions = {
+                    to: result[0].email,
+                    from: 'roulettegame.node@gmail.com',
+                    subject: 'Password Reset',
+                    text: 'The account linked to this email has requested a password reset. Click the following link and enter a new password. \n' + 'localhost:8080' +
+                        '/reset/' + request.session.user.token,
+                    auth: {
+                        user: 'roulettegame.node@gmail.com',
+                        refreshToken: process.env.refresh_token,
+                        accessToken: atoken
+                    }
+                };
 
-            var transporter = nodemailer.createTransport({
-                service: 'gmail',
-                auth: auth
-            });
+                console.log(request.session.user.token);
 
-            transporter.sendMail(mailOptions, (err, response) => {
+                var transporter = nodemailer.createTransport({
+                    service: 'gmail',
+                    auth: auth
+                });
+
+                transporter.sendMail(mailOptions, (err, response) => {
+                    if (err) {
+                        console.log(err);
+                    }
+                });
+
                 if (err) {
                     console.log(err);
                 } else {
-                    response.send('Email sent');
+                    response.render('simple_response.hbs', {
+                        h1: 'An email has been sent'
+                    });
                 }
             });
-
-            if (err) {
-                console.log(err);
-            }
 
         }
     });
 
 });
 
+app.get('/reset/:token', function (request, response) {
+    var db = utils.getDB();
+
+    db.collection('users').find({
+        token: request.params.token
+    }).toArray(function (err, result) {
+        if (result[0] == null) {
+            response.render('simple_response.hbs', {
+                h1: 'Invalid Token'
+            });
+        } else {
+            response.render('reset.hbs', {
+                username: result[0].username
+            });
+        }
+    });
+});
+
+app.post('/reset/:token', function (request, response) {
+    var db = utils.getDB();
+
+    var password = request.body.password;
+    password = bcrypt.hashSync(password, saltrounds);
+    var token = request.params.token;
+
+    db.collection('users').find({
+        token: token
+    }).toArray(function (err, result) {
+        if (result[0] != null) {
+            db.collection('users').updateOne(
+                { token: token },
+                {
+                    $set: {
+                        password: password
+                    }
+                }
+            );
+            response.render('reset_result.hbs', {
+                h1: 'Password Reset',
+                message: 'Your password has been succesfully reset.'
+            });
+        } else {
+            response.render('reset_result.hbs', {
+                h1: 'Invalid Token',
+                message: 'You have provided an invalid token. No changes have been made.'
+            });
+        }
+    });
+});
 app.listen(port, () => {
     console.log(`Server is up on port ${port}`);
+    console.log(atoken);
     utils.init();
 });

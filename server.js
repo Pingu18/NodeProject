@@ -37,7 +37,9 @@ app.use('/profile', (request, response, next) => {
     if (request.session.user) {
         next();
     } else {
-        response.status(401).send('User not authorized. Please log in.');
+        response.render('simple_response.hbs', {
+            h1: 'User not authorized. Please sign in.'
+        });
     }
 });
 

@@ -1,17 +1,23 @@
+require('dotenv').config();
 const express = require('express');
-const hbs = require('hbs');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-const secret = "abc123";
+const secret = process.env.SECRET;
 const crypto = require('crypto');
 const session = require('express-session');
 const flash = require('express-flash');
 const nodemailer = require('nodemailer');
-const async = require('async');
-const { google } = require('googleapis');
-const atoken = "ya29.GlvmBrkOyJpvGJMrHC3qHNRkWTniML2DgCTQ26yjbnrkQyCr2R6P5-l6XYPg9nkvkM3Kl4XXYd4iMEDCC-XoFEELZhyTTI83Bh9qyQv3uN0TIcf53jLddDqsmXsD";
 const saltrounds = 10;
 const port = process.env.PORT || 8080;
+const MongoClient = require('mongodb').MongoClient;
+var db;
+
+MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+ 
+    if (err) throw err;
+
+    db = client.db(process.env.DB);
+});
 
 var app = express();
 var utils = require('./utils');
@@ -34,7 +40,9 @@ app.use('/profile', (request, response, next) => {
     if (request.session.user) {
         next();
     } else {
-        response.status(401).send('User not authorized. Please log in.');
+        response.render('simple_response.hbs', {
+            h1: 'User not authorized. Please sign in.'
+        });
     }
 });
 
@@ -42,7 +50,9 @@ app.use('/game', (request, response, next) => {
     if (request.session.user) {
         next();
     } else {
-        response.status(401).send('User not authorized. Please log in.');
+        response.render('simple_response.hbs', {
+            h1: 'User not authorzied. Please sign in.'
+        });
     }
 });
 
@@ -81,11 +91,30 @@ app.get('/profile', function (request, response) {
     });
 });
 
+app.post('/profile', function(request, response) {
+    //db = utils.getDB();
+
+    score = request.body.score;
+    email = request.session.user.email;
+
+    db.collection('users').updateOne(
+        { email: email },
+        {
+            $set: {
+                score: Number(score)
+            }
+        }
+        
+    );
+    response.redirect('/profile');
+
+});
+
 app.get('/game', function (request, response) {
     response.render('game.hbs', {
         title: 'Game',
         user: request.session.user.username,
-        score: request.session.user.score
+        score: Number(request.session.user.score)
     });
 });
 
@@ -94,7 +123,7 @@ app.get('/404', function (request, response) {
 });
 
 app.post('/create-user', function (request, response) {
-    var db = utils.getDB();
+    //db = utils.getDB();
 
     var username = request.body.username;
     var password = request.body.password;
@@ -109,7 +138,7 @@ app.post('/create-user', function (request, response) {
             h1: 'Passwords must match'
         });
         create = 0;
-    };
+    }
 
     db.collection('users').find({
         email: email
@@ -117,9 +146,9 @@ app.post('/create-user', function (request, response) {
         if (result[0] != null) {
             response.render('simple_response.hbs', {
                 h1: 'Email already in use'
-            })
+            });
             create = 0;
-        };
+        }
     });
 
     password = bcrypt.hashSync(password, saltrounds);
@@ -153,7 +182,7 @@ app.post('/create-user', function (request, response) {
 });
 
 app.post('/login-user', function (request, response) {
-    var db = utils.getDB();
+    //var db = utils.getDB();
 
     var username = request.body.username;
     var password = request.body.password;
@@ -192,7 +221,7 @@ app.get('/reset-password', function (request, response) {
 });
 
 app.post('/reset', function (request, response) {
-    var db = utils.getDB();
+    //var db = utils.getDB();
 
     var email = request.body.email;
     var token;
@@ -228,24 +257,24 @@ app.post('/reset', function (request, response) {
                             tokenExpire: Date.now() + 3600
                         }
                     }
-                )
+                );
 
-                request.session.user.token = token
-                request.session.user.tokenExpire = Date.now() + 3600
+                request.session.user.token = token;
+                request.session.user.tokenExpire = Date.now() + 3600;
                 request.session.save(function (err) {
                     if (err) {
                         console.log(err);
                     }
-                })
+                });
             });
 
             var auth = {
                 type: 'oauth2',
                 user: 'roulettegame.node@gmail.com',
-                clientId: process.env.client_id,
-                clientSecret: process.env.client_secret,
-                refreshToken: process.env.refresh_token,
-                accessToken: atoken
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
+                refreshToken: process.env.RTOKEN,
+                accessToken: process.env.ATOKEN
             };
 
             db.collection('users').find({
@@ -255,12 +284,12 @@ app.post('/reset', function (request, response) {
                     to: result[0].email,
                     from: 'roulettegame.node@gmail.com',
                     subject: 'Password Reset',
-                    text: 'The account linked to this email has requested a password reset. Click the following link and enter a new password. \n' + 'localhost:8080' +
-                        '/reset/' + request.session.user.token,
+                    text: 'The account linked to this email has requested a password reset. Click the following link and enter a new password. \n' + 
+                    'https://gentle-depths-71497.herokuapp.com' + '/reset/' + request.session.user.token,
                     auth: {
                         user: 'roulettegame.node@gmail.com',
-                        refreshToken: process.env.refresh_token,
-                        accessToken: atoken
+                        refreshToken: process.env.RTOKEN,
+                        accessToken: process.env.ATOKEN
                     }
                 };
 
@@ -292,7 +321,7 @@ app.post('/reset', function (request, response) {
 });
 
 app.get('/reset/:token', function (request, response) {
-    var db = utils.getDB();
+    //var db = utils.getDB();
 
     db.collection('users').find({
         token: request.params.token
@@ -310,7 +339,7 @@ app.get('/reset/:token', function (request, response) {
 });
 
 app.post('/reset/:token', function (request, response) {
-    var db = utils.getDB();
+    //var db = utils.getDB();
 
     var password = request.body.password;
     password = bcrypt.hashSync(password, saltrounds);
@@ -342,5 +371,5 @@ app.post('/reset/:token', function (request, response) {
 });
 app.listen(port, () => {
     console.log(`Server is up on port ${port}`);
-    utils.init();
+    //utils.init();
 });

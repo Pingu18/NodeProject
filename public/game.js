@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 var player_score = Number(document.getElementById("score").innerHTML);
 var position = 0
 var rotation = 0
@@ -13,6 +14,7 @@ var game_start = false;
 var current_pic = 1
 var who_go = 'self'
 var round = 1
+
 
 
 function SetPosition(num) {
@@ -49,15 +51,15 @@ GenBotName()
 
 
 function Check() {
-    SetRotation()
+    SetRotation();
     if (position == 0) {
-        alert('Select a Number on the roulette')
-        return
+        alert('Select a Number on the roulette');
+        return;
     } else if (rotation == 0) {
-        alert('Select a Number from the list on the right')
-        return
+        alert('Select a Number from the list on the right');
+        return;
     }
-    StartGame()
+    StartGame();
 }
 
 function ApplyMask() {
@@ -133,6 +135,7 @@ function CurrentPic(num) {
 function StartGame() {
     console.log(position);
     console.log(rotation);
+
 
     game_start = true;
 

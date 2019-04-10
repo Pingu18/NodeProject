@@ -289,8 +289,8 @@ app.post('/reset', function (request, response) {
                     to: result[0].email,
                     from: 'roulettegame.node@gmail.com',
                     subject: 'Password Reset',
-                    text: 'The account linked to this email has requested a password reset. Click the following link and enter a new password. \n' + 'localhost:8080' +
-                        '/reset/' + request.session.user.token,
+                    text: 'The account linked to this email has requested a password reset. Click the following link and enter a new password. \n' + 
+                    'https://gentle-depths-71497.herokuapp.com' + '/reset/' + request.session.user.token,
                     auth: {
                         user: 'roulettegame.node@gmail.com',
                         refreshToken: rtoken,

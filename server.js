@@ -97,7 +97,7 @@ app.get('/profile', function (request, response) {
 });
 
 app.post('/profile', function(request, response) {
-    db = utils.getDB();
+    //db = utils.getDB();
 
     score = request.body.score;
     email = request.session.user.email;
@@ -128,7 +128,7 @@ app.get('/404', function (request, response) {
 });
 
 app.post('/create-user', function (request, response) {
-    db = utils.getDB();
+    //db = utils.getDB();
 
     var username = request.body.username;
     var password = request.body.password;
@@ -226,7 +226,7 @@ app.get('/reset-password', function (request, response) {
 });
 
 app.post('/reset', function (request, response) {
-    var db = utils.getDB();
+    //var db = utils.getDB();
 
     var email = request.body.email;
     var token;
@@ -326,7 +326,7 @@ app.post('/reset', function (request, response) {
 });
 
 app.get('/reset/:token', function (request, response) {
-    var db = utils.getDB();
+    //var db = utils.getDB();
 
     db.collection('users').find({
         token: request.params.token
@@ -344,7 +344,7 @@ app.get('/reset/:token', function (request, response) {
 });
 
 app.post('/reset/:token', function (request, response) {
-    var db = utils.getDB();
+    //var db = utils.getDB();
 
     var password = request.body.password;
     password = bcrypt.hashSync(password, saltrounds);

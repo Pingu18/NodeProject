@@ -1,27 +1,22 @@
+require('dotenv').config();
 const express = require('express');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
-const secret = "abc123";
+const secret = process.env.SECRET;
 const crypto = require('crypto');
 const session = require('express-session');
 const flash = require('express-flash');
 const nodemailer = require('nodemailer');
-const atoken = "ya29.GlvmBrkOyJpvGJMrHC3qHNRkWTniML2DgCTQ26yjbnrkQyCr2R6P5-l6XYPg9nkvkM3Kl4XXYd4iMEDCC-XoFEELZhyTTI83Bh9qyQv3uN0TIcf53jLddDqsmXsD";
-const rtoken = " 1/kyCGdAd3qOXNpxv2OodPzqYJawbJ2jd7x8XncPUKDcM";
-const c_id = "501389035466-iv8pttp4ql12dq17nnrbq1vpesvqr8ru.apps.googleusercontent.com";
-const c_sec = "GHMetXcZ22ZQEABLwTCizmfV";
 const saltrounds = 10;
 const port = process.env.PORT || 8080;
 const MongoClient = require('mongodb').MongoClient;
 var db;
 
-let uri = 'mongodb://heroku_7zxdfd6q:rv4hlanuoktj5mr3lvqv4f31mb@ds237196.mlab.com:37196/heroku_7zxdfd6q';
-
-MongoClient.connect(uri, function (err, client) {
-
+MongoClient.connect(process.env.MONGODB_URI, function (err, client) {
+ 
     if (err) throw err;
 
-    db = client.db('heroku_7zxdfd6q');
+    db = client.db(process.env.DB);
 });
 
 var app = express();
@@ -276,10 +271,10 @@ app.post('/reset', function (request, response) {
             var auth = {
                 type: 'oauth2',
                 user: 'roulettegame.node@gmail.com',
-                clientId: c_id,
-                clientSecret: c_sec,
-                refreshToken: rtoken,
-                accessToken: atoken
+                clientId: process.env.CLIENT_ID,
+                clientSecret: process.env.CLIENT_SECRET,
+                refreshToken: process.env.RTOKEN,
+                accessToken: process.env.ATOKEN
             };
 
             db.collection('users').find({
@@ -293,8 +288,8 @@ app.post('/reset', function (request, response) {
                     'https://gentle-depths-71497.herokuapp.com' + '/reset/' + request.session.user.token,
                     auth: {
                         user: 'roulettegame.node@gmail.com',
-                        refreshToken: rtoken,
-                        accessToken: atoken
+                        refreshToken: process.env.RTOKEN,
+                        accessToken: process.env.ATOKEN
                     }
                 };
 

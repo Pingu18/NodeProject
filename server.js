@@ -158,6 +158,7 @@ app.post('/create-user', function (request, response) {
 });
 
 app.post('/login-user', function (request, response) {
+    utils.init();
     var db = utils.getDB();
 
     var username = request.body.username;

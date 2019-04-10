@@ -12,6 +12,7 @@ const c_id = "501389035466-iv8pttp4ql12dq17nnrbq1vpesvqr8ru.apps.googleuserconte
 const c_sec = "GHMetXcZ22ZQEABLwTCizmfV";
 const saltrounds = 10;
 const port = process.env.PORT || 8080;
+const MongoClient = require('mongodb').MongoClient;
 var db;
 
 let uri = 'mongodb://heroku_7zxdfd6q:rv4hlanuoktj5mr3lvqv4f31mb@ds237196.mlab.com:37196/heroku_7zxdfd6q';

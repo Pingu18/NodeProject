@@ -181,3 +181,9 @@ body{
 	padding: 0px 5px 0px 10px;
 
 }
+
+#notification{
+	position: absolute;
+	top: 310px;
+	left: 310px;
+}

@@ -376,5 +376,5 @@ app.post('/reset/:token', function (request, response) {
 });
 app.listen(port, () => {
     console.log(`Server is up on port ${port}`);
-    utils.init();
+    //utils.init();
 });

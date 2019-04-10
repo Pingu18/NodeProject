@@ -1,10 +1,10 @@
 var player_score = document.getElementById("score").innerHTML;
-var position = 0
-var rotation = 0
+var position = 0;
+var rotation = 0;
 
-var bot_name = null
-var position_bot = 0
-var rotation_bot = 0
+var bot_name = null;
+var position_bot = 0;
+var rotation_bot = 0;
 
 
 function SetPosition(num) {
@@ -32,15 +32,15 @@ setTimeout('BotSelect()', 5000);
 
 
 function Check() {
-    SetRotation()
+    SetRotation();
     if (position == 0) {
-        alert('Select a Number on the roulette')
-        return
+        alert('Select a Number on the roulette');
+        return;
     } else if (rotation == 0) {
-        alert('Select a Number from the list on the right')
-        return
+        alert('Select a Number from the list on the right');
+        return;
     }
-    StartGame()
+    StartGame();
 }
 
 function ApplyMask() {
@@ -56,5 +56,5 @@ function ApplyMask() {
 function StartGame() {
     console.log(position);
     console.log(rotation);
-    ApplyMask()
+    ApplyMask();
 }

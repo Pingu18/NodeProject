@@ -47,7 +47,7 @@ app.use('/game', (request, response, next) => {
     if (request.session.user) {
         next();
     } else {
-        response.render('sample_response.hbs', {
+        response.render('simple_response.hbs', {
             h1: 'User not authorzied. Please sign in.'
         });
     }
@@ -88,11 +88,30 @@ app.get('/profile', function (request, response) {
     });
 });
 
+app.post('/profile', function(request, response) {
+    db = utils.getDB();
+
+    score = request.body.score;
+    email = request.session.user.email;
+
+    db.collection('users').updateOne(
+        { email: email },
+        {
+            $set: {
+                score: Number(score)
+            }
+        }
+        
+    );
+    response.redirect('/profile');
+
+});
+
 app.get('/game', function (request, response) {
     response.render('game.hbs', {
         title: 'Game',
         user: request.session.user.username,
-        score: request.session.user.score
+        score: Number(request.session.user.score)
     });
 });
 
@@ -116,7 +135,7 @@ app.post('/create-user', function (request, response) {
             h1: 'Passwords must match'
         });
         create = 0;
-    };
+    }
 
     db.collection('users').find({
         email: email
@@ -124,9 +143,9 @@ app.post('/create-user', function (request, response) {
         if (result[0] != null) {
             response.render('simple_response.hbs', {
                 h1: 'Email already in use'
-            })
+            });
             create = 0;
-        };
+        }
     });
 
     password = bcrypt.hashSync(password, saltrounds);
@@ -160,7 +179,6 @@ app.post('/create-user', function (request, response) {
 });
 
 app.post('/login-user', function (request, response) {
-    utils.init();
     var db = utils.getDB();
 
     var username = request.body.username;
@@ -236,15 +254,15 @@ app.post('/reset', function (request, response) {
                             tokenExpire: Date.now() + 3600
                         }
                     }
-                )
+                );
 
-                request.session.user.token = token
-                request.session.user.tokenExpire = Date.now() + 3600
+                request.session.user.token = token;
+                request.session.user.tokenExpire = Date.now() + 3600;
                 request.session.save(function (err) {
                     if (err) {
                         console.log(err);
                     }
-                })
+                });
             });
 
             var auth = {

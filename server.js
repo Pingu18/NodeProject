@@ -1,5 +1,4 @@
 const express = require('express');
-const hbs = require('hbs');
 const bodyParser = require('body-parser');
 const bcrypt = require('bcrypt');
 const secret = "abc123";
@@ -7,14 +6,27 @@ const crypto = require('crypto');
 const session = require('express-session');
 const flash = require('express-flash');
 const nodemailer = require('nodemailer');
-const async = require('async');
-const { google } = require('googleapis');
 const atoken = "ya29.GlvmBrkOyJpvGJMrHC3qHNRkWTniML2DgCTQ26yjbnrkQyCr2R6P5-l6XYPg9nkvkM3Kl4XXYd4iMEDCC-XoFEELZhyTTI83Bh9qyQv3uN0TIcf53jLddDqsmXsD";
-const rtoken = "1/kyCGdAd3qOXNpxv2OodPzqYJawbJ2jd7x8XncPUKDcM";
+const rtoken = " 1/kyCGdAd3qOXNpxv2OodPzqYJawbJ2jd7x8XncPUKDcM";
 const c_id = "501389035466-iv8pttp4ql12dq17nnrbq1vpesvqr8ru.apps.googleusercontent.com";
 const c_sec = "GHMetXcZ22ZQEABLwTCizmfV";
 const saltrounds = 10;
 const port = process.env.PORT || 8080;
+var db;
+
+let uri = 'mongodb://heroku_7zxdfd6q:rv4hlanuoktj5mr3lvqv4f31mb@ds237196.mlab.com:37196/heroku_7zxdfd6q';
+
+mongodb.MongoClient.connect(uri, function (err, client) {
+
+    if (err) throw err;
+
+    /*
+     * Get the database from the client. Nothing is required to create a
+     * new database, it is created automatically when we insert.
+     */
+
+    db = client.db('dbname');
+});
 
 var app = express();
 var utils = require('./utils');
@@ -120,7 +132,7 @@ app.get('/404', function (request, response) {
 });
 
 app.post('/create-user', function (request, response) {
-    var db = utils.getDB();
+    db = utils.getDB();
 
     var username = request.body.username;
     var password = request.body.password;
@@ -179,7 +191,7 @@ app.post('/create-user', function (request, response) {
 });
 
 app.post('/login-user', function (request, response) {
-    var db = utils.getDB();
+    //var db = utils.getDB();
 
     var username = request.body.username;
     var password = request.body.password;
